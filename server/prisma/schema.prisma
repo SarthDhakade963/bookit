@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Experience {
+  id          String      @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String?
+  location    String?
+  priceCents  Int
+  imageUrl    String?
+  durationMin Int?
+  createdAt   DateTime @default(now())
+
+  slots       Slot[]
+  bookings    Booking[]
+}
+
+// Time slot
+model Slot {
+  id            String      @id @default(uuid())
+  experienceId  String
+  experience    Experience @relation(fields: [experienceId], references: [id])
+
+  time          String
+  capacity      Int      @default(8)
+  createdAt     DateTime @default(now())
+
+  availability  SlotAvailability[]
+  bookings      Booking[]
+}
+
+// Date slot
+model SlotAvailability {
+  id       String      @id @default(uuid())
+  slotId   String
+  slot     Slot @relation(fields: [slotId], references: [id])
+
+  date     DateTime
+  capacity Int
+
+
+  @@unique([slotId, date])
+}
+
+model Booking {
+  id              String      @id @default(uuid())
+  experienceId    String
+  experience Experience @relation(fields: [experienceId], references: [id])
+  
+  slotId          String
+  slot       Slot       @relation(fields: [slotId], references: [id])
+
+  date            DateTime
+  userName        String
+  userEmail       String
+  seats           Int
+  promoCode       String?
+  totalPriceCents Int
+  status          BookingStatus   @default(PENDING)
+  createdAt       DateTime @default(now())
+}
+
+enum BookingStatus {
+  CONFIRMED
+  PENDING
+  FAILED
+}
