@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { z } from "zod";
 import { applyPromo } from "../utils/promo";
 import { promoSchema } from "../utils/types";
 
