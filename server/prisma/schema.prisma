@@ -24,52 +24,53 @@ model Experience {
   durationMin Int?
   createdAt   DateTime @default(now())
 
-  slots       Slot[]
+  dates       Slot[]
   bookings    Booking[]
 }
 
-// Time slot
-model Slot {
+model Slot { // Date Slot
   id            String      @id @default(uuid())
   experienceId  String
   experience    Experience @relation(fields: [experienceId], references: [id])
 
-  time          String
-  capacity      Int      @default(8)
+  date          DateTime 
   createdAt     DateTime @default(now())
 
-  availability  SlotAvailability[]
+  times         SlotAvailability[]
   bookings      Booking[]
 }
 
-// Date slot
-model SlotAvailability {
+model SlotAvailability { // Time Slot
   id       String      @id @default(uuid())
   slotId   String
   slot     Slot @relation(fields: [slotId], references: [id])
 
-  date     DateTime
-  capacity Int
+  time     String       
+  capacity Int @default(8)
+  bookings  Booking[]
 
-
-  @@unique([slotId, date])
+  @@unique([slotId, time])  
 }
 
 model Booking {
   id              String      @id @default(uuid())
   experienceId    String
-  experience Experience @relation(fields: [experienceId], references: [id])
-  
-  slotId          String
-  slot       Slot       @relation(fields: [slotId], references: [id])
+  experience      Experience @relation(fields: [experienceId], references: [id])
 
+  slotId          String
+  slot            Slot @relation(fields: [slotId], references: [id])
+
+  slotTimeId      String      
+  slotTime        SlotAvailability @relation(fields: [slotTimeId], references: [id])
+  
   date            DateTime
   userName        String
   userEmail       String
   seats           Int
   promoCode       String?
   totalPriceCents Int
-  status          BookingStatus   @default(PENDING)
+
+  status          BookingStatus @default(PENDING)
   createdAt       DateTime @default(now())
 }
 

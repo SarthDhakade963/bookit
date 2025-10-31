@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Experience } from "@/types/type";
+
 export default function ExperienceCard({
   id,
   title,

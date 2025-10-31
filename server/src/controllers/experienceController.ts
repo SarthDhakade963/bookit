@@ -23,11 +23,11 @@ export const getAllExperiences = async (req: Request, res: Response) => {
   }
 };
 
-export const getExperienceById = async (req: Request, res: Response) => {
+export const getExperienceBySlug = async (req: Request, res: Response) => {
   try {
-    const { experienceId } = req.params;
+    const { slug } = req.params;
     const experience = await prisma.experience.findUnique({
-      where: { id: experienceId },
+      where: { slug },
       select: {
         id: true,
         title: true,

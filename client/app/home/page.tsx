@@ -5,12 +5,14 @@ async function getExperiences() {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/experiences`,
     {
+      method: "GET",
       cache: "default",
     }
   );
 
   if (!res.ok) throw new Error("Failed to fetch experiences");
   const data = await res.json();
+
   return data.experiences as Experience[];
 }
 
