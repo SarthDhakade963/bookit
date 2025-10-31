@@ -28,7 +28,8 @@ model Experience {
   bookings    Booking[]
 }
 
-model Slot { // Date Slot
+// Date Slot
+model Slot { 
   id            String      @id @default(uuid())
   experienceId  String
   experience    Experience @relation(fields: [experienceId], references: [id])
@@ -40,7 +41,8 @@ model Slot { // Date Slot
   bookings      Booking[]
 }
 
-model SlotAvailability { // Time Slot
+// Time Slot
+model SlotAvailability { 
   id       String      @id @default(uuid())
   slotId   String
   slot     Slot @relation(fields: [slotId], references: [id])

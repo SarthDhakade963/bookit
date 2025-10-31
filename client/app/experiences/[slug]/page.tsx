@@ -2,28 +2,40 @@
 
 import Image from "next/image";
 import PaymentCard from "@/components/PaymentCard";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-interface ExperienceSlot {
-  startTime: string;
+interface SlotTime {
+  id: string;
+  time: string;
+  slotId: string;
   capacity: number;
 }
 
+interface SlotDate {
+  id: string;
+  date: string;
+  times: SlotTime[];
+}
+
 interface Experience {
+  id: string;
   title: string;
   slug: string;
   description: string;
   imageUrl: string;
   priceCents: number;
-  availableDates: string[];
-  slots: ExperienceSlot[];
+  dates: SlotDate[];
 }
 
 export default function ExperienceDetails() {
   const { slug } = useParams();
+  const router = useRouter();
   const [experience, setExperience] = useState<Experience | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -38,8 +50,11 @@ export default function ExperienceDetails() {
         if (!res.ok) throw new Error("Failed to fetch experience");
         const data = await res.json();
 
-        console.log(data.experience);
-        setExperience(data.experience);
+        const formatted = data.experience;
+
+        console.log(formatted);
+
+        setExperience(formatted);
       } catch (err) {
         console.error(err);
       } finally {
@@ -53,6 +68,23 @@ export default function ExperienceDetails() {
   if (loading) return <p className="text-center py-10">Loading...</p>;
   if (!experience) return <p className="text-center py-10">Not Found</p>;
 
+  const selectedDateObj = experience.dates.find((d) => d.id === selectedDate);
+  const selectedSlot = selectedDateObj?.times.find(
+    (t) => t.id === selectedTime
+  );
+
+  const goToCheckout = () => {
+    if (!selectedDate || !selectedTime) return;
+
+    const url = `/checkout?experience=${experience.title}&slug=${slug}&price=${
+      experience.priceCents / 100
+    }&date=${selectedDateObj?.date}&time=${selectedSlot?.time}&qty=1&slotId=${
+      selectedSlot?.id
+    }`;
+
+    router.push(url);
+  };
+
   return (
     <div className="max-w-6xl mx-auto py-10">
       <div className="flex gap-8">
@@ -65,44 +97,79 @@ export default function ExperienceDetails() {
             className="rounded-xl mb-6 object-cover"
           />
 
-          <h1 className="text-3xl font-semibold mb-2">{experience.title}</h1>
+          <h1 className="text-3xl font-semibold mb-2 text-black">
+            {experience.title}
+          </h1>
           <p className="text-gray-600 mb-6">{experience.description}</p>
 
-          <h2 className="font-semibold mb-2">Choose date</h2>
-          <div className="flex gap-2 mb-6">
-            {experience.slots.availability.map((date: string, i: number) => (
+          <h2 className="font-semibold mb-2 text-xl text-black">Choose date</h2>
+          <div className="flex gap-2 mb-6 text-gray-500 ">
+            {experience.dates.map((dateObj) => (
               <button
-                key={i}
-                className="px-4 py-2 border rounded-lg text-sm hover:bg-black hover:text-white"
-              >
-                {date}
-              </button>
-            ))}
-          </div>
-
-          <h2 className="font-semibold mb-2">Choose time</h2>
-          <div className="flex gap-2 mb-6">
-            {experience.slots.map((s, i) => (
-              <button
-                key={i}
-                disabled={s.capacity === 0}
+                key={dateObj.id}
+                onClick={() => {
+                  setSelectedDate(dateObj.id);
+                  setSelectedTime(null);
+                }}
                 className={`px-4 py-2 border rounded-lg text-sm ${
-                  s.capacity === 0 ? "opacity-40 cursor-not-allowed" : ""
+                  selectedDate === dateObj.id
+                    ? "bg-yellow-400  text-black border-0"
+                    : "hover:bg-yellow-300 hover:text-black hover:border-0"
                 }`}
               >
-                {s.startTime} {s.capacity === 0 && "(Sold out)"}
+                {new Date(dateObj.date).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}
               </button>
             ))}
           </div>
 
-          <h3 className="font-semibold mb-2">About</h3>
-          <p className="bg-gray-100 p-3 rounded-md text-sm">
+          {selectedDate && (
+            <>
+              <h2 className="font-semibold mb-2 text-xl text-black">
+                Choose time
+              </h2>
+              <div className="flex gap-2 mb-6 flex-wrap text-gray-500">
+                {selectedDateObj!.times.map((slot) => (
+                  <button
+                    key={slot.id}
+                    disabled={slot.capacity === 0}
+                    onClick={() => setSelectedTime(slot.id)}
+                    className={`w-fit px-4 py-2 border  rounded-lg text-sm flex justify-between items-center ${
+                      slot.capacity === 0
+                        ? "opacity-40 cursor-not-allowed"
+                        : selectedTime === slot.id
+                        ? "bg-yellow-400 text-black border-0"
+                        : "hover:bg-yellow-300 hover:text-black hover:border-0"
+                    }`}
+                  >
+                    {slot.time}
+                    <span className="ml-2 text-xs text-red-500">
+                      {slot.capacity === 0
+                        ? "Sold out"
+                        : `${slot.capacity} left`}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          <h3 className="font-semibold mb-2 text-black text-xl">About</h3>
+          <p className="bg-gray-100 p-3 rounded-md text-sm text-gray-400">
             Scenic routes, trained guides, and safety briefing. Minimum age 10.
           </p>
         </div>
 
         <div className="w-80">
-          <PaymentCard price={experience.priceCents / 100} />
+          <PaymentCard
+            price={experience.priceCents / 100}
+            experienceTitle={experience.title}
+            selectedDate={selectedDateObj?.date ?? null}
+            selectedTime={selectedSlot?.time ?? null}
+            slotId={selectedSlot?.id ?? null}
+          />
         </div>
       </div>
     </div>

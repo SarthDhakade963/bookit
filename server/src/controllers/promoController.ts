@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { applyPromo } from "../utils/promo";
 import { promoSchema } from "../utils/types";
 
-
 export const validatePromo = async (req: Request, res: Response) => {
   try {
     const parsed = promoSchema.safeParse(req.body);
@@ -24,6 +23,8 @@ export const validatePromo = async (req: Request, res: Response) => {
         message: "Invalid promo code",
       });
     }
+
+    console.log(discounted);
 
     return res.status(200).json({
       success: true,

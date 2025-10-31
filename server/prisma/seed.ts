@@ -3,7 +3,7 @@ import { addDays, startOfDay } from "date-fns";
 
 const prisma = new PrismaClient();
 
-const slotTimes = ["07:00", "09:00", "11:00", "13:00"];
+const slotTimes = ["07:00 am", "09:00 am", "11:00 am", "1:00 pm"];
 
 function getNextSixDates() {
   const dates = [];
@@ -124,7 +124,6 @@ async function main() {
           data: {
             slotId: slotDate.id,
             time,
-            capacity: 8,
           },
         });
       }
