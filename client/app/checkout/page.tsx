@@ -1,10 +1,11 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function CheckoutPage() {
   const params = useSearchParams();
+  const router = useRouter();
 
   const experience = params.get("experience");
   const date = params.get("date");
@@ -19,7 +20,7 @@ export default function CheckoutPage() {
   const price = Number(params.get("price") || 0);
   const qty = Number(params.get("qty") || 1);
   const slotId = params.get("slotId");
-  const slug = params.get("slug");
+  const slug = params.get("experience");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,28 +43,36 @@ export default function CheckoutPage() {
     });
 
     const data = await res.json();
-    if (data.success) alert("Promo successful!");
-
-    setDiscount(data.discountApplied);
+    if (data.success) {
+      alert("Promo successful!");
+      setDiscount(data.discountApplied);
+    }
   };
 
   const confirmBooking = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/booking`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        experienceId: slug,
-        slotId,
-        userName: name,
-        userEmail: email,
-        seats: qty,
-        date,
-        promoCode: promo,
-      }),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          experienceSlug: slug,
+          slotTimeId: slotId,
+          userName: name,
+          userEmail: email,
+          seats: qty,
+          promoCode: promo,
+        }),
+      }
+    );
 
     const data = await res.json();
-    if (data.success) alert("Booking successful!");
+
+    if (data.success) {
+      router.push(`/booking?bookingId=${data.booking.id}`);
+    } else {
+      alert(data.message || "Booking failed");
+    }
   };
 
   return (

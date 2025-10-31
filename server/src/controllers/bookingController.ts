@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import prisma from "../config/prismaClient";
-import { z } from "zod";
 import { applyPromo } from "../utils/promo";
 import { bookingSchema } from "../utils/types";
 
 export const createBooking = async (req: Request, res: Response) => {
   try {
+    console.log(req.body);
     const parsed = bookingSchema.safeParse(req.body);
+
+    console.log("Parsed: ", parsed);
     if (!parsed.success) {
       return res.status(400).json({
         success: false,
@@ -15,8 +17,7 @@ export const createBooking = async (req: Request, res: Response) => {
     }
 
     const {
-      experienceId,
-      slotId,
+      experienceSlug,
       slotTimeId,
       userName,
       userEmail,
@@ -24,20 +25,22 @@ export const createBooking = async (req: Request, res: Response) => {
       promoCode,
     } = parsed.data;
 
+    console.log(parsed.data);
+
     const result = await prisma.$transaction(async (tx) => {
-      const availability = await tx.slotAvailability.findUnique({
+      const slotTime = await tx.slotAvailability.findUnique({
         where: { id: slotTimeId },
       });
 
-      if (!availability) throw new Error("Selected time slot does not exist");
-      if (availability.slotId !== slotId)
-        throw new Error("Selected time slot does not belong to this date");
+      console.log("Slot time: ", slotTime);
 
-      if (availability.capacity < seats)
+      if (!slotTime) throw new Error("Selected time slot does not exist");
+
+      if (slotTime.capacity < seats)
         throw new Error("Not enough seats available");
 
       const experience = await tx.experience.findUnique({
-        where: { id: experienceId },
+        where: { slug: experienceSlug },
       });
 
       if (!experience) throw new Error("Experience not found");
@@ -46,15 +49,15 @@ export const createBooking = async (req: Request, res: Response) => {
       const discounted = applyPromo(promoCode, total);
 
       await tx.slotAvailability.update({
-        where: { id: availability.id },
-        data: { capacity: availability.capacity - seats },
+        where: { id: slotTime.id },
+        data: { capacity: slotTime.capacity - seats },
       });
 
       const booking = await tx.booking.create({
         data: {
-          experienceId,
-          slotId,
-          slotTimeId,
+          experienceId: experience.id,
+          slotId: slotTime.slotId,
+          slotTimeId: slotTime.id,
           date: new Date(),
           userName,
           userEmail,
@@ -68,9 +71,14 @@ export const createBooking = async (req: Request, res: Response) => {
       return booking;
     });
 
+    console.log(result);
+
     return res.status(200).json({ success: true, booking: result });
   } catch (err: any) {
     console.error("Booking Error:", err);
-    return res.status(400).json({ success: false, message: err.message });
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message || "Something went wrong",
+    });
   }
 };

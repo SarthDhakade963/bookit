@@ -6,8 +6,7 @@ export const promoSchema = z.object({
 });
 
 export const bookingSchema = z.object({
-  experienceId: z.string().uuid(),
-  slotId: z.string().uuid(),
+  experienceSlug: z.string(),
   slotTimeId: z.string(),
   userName: z.string().min(2),
   userEmail: z.string().email(),

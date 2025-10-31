@@ -47,7 +47,7 @@ model SlotAvailability {
   slotId   String
   slot     Slot @relation(fields: [slotId], references: [id])
 
-  time     String       
+  time     String      
   capacity Int @default(8)
   bookings  Booking[]
 

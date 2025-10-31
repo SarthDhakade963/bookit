@@ -3,7 +3,6 @@ import Image from "next/image";
 import { Experience } from "@/types/type";
 
 export default function ExperienceCard({
-  id,
   title,
   description,
   location,

@@ -5,7 +5,7 @@ import React, { useState } from "react";
 
 interface Props {
   price: number;
-  experienceTitle: string;
+  experienceSlug: string;
   selectedDate: string | null;
   selectedTime: string | null;
   slotId: string | null;
@@ -13,7 +13,7 @@ interface Props {
 
 export default function PaymentCard({
   price,
-  experienceTitle,
+  experienceSlug,
   selectedDate,
   selectedTime,
   slotId,
@@ -30,7 +30,7 @@ export default function PaymentCard({
 
     router.push(
       `/checkout?experience=${encodeURIComponent(
-        experienceTitle
+        experienceSlug
       )}&date=${selectedDate}&time=${selectedTime}&qty=${qty}&price=${price}&slotId=${slotId}`
     );
   };

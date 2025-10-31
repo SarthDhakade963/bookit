@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import PaymentCard from "@/components/PaymentCard";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface SlotTime {
@@ -30,7 +30,6 @@ interface Experience {
 
 export default function ExperienceDetails() {
   const { slug } = useParams();
-  const router = useRouter();
   const [experience, setExperience] = useState<Experience | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,18 +71,6 @@ export default function ExperienceDetails() {
   const selectedSlot = selectedDateObj?.times.find(
     (t) => t.id === selectedTime
   );
-
-  const goToCheckout = () => {
-    if (!selectedDate || !selectedTime) return;
-
-    const url = `/checkout?experience=${experience.title}&slug=${slug}&price=${
-      experience.priceCents / 100
-    }&date=${selectedDateObj?.date}&time=${selectedSlot?.time}&qty=1&slotId=${
-      selectedSlot?.id
-    }`;
-
-    router.push(url);
-  };
 
   return (
     <div className="max-w-6xl mx-auto py-10">
@@ -165,7 +152,7 @@ export default function ExperienceDetails() {
         <div className="w-80">
           <PaymentCard
             price={experience.priceCents / 100}
-            experienceTitle={experience.title}
+            experienceSlug={experience.slug}
             selectedDate={selectedDateObj?.date ?? null}
             selectedTime={selectedSlot?.time ?? null}
             slotId={selectedSlot?.id ?? null}

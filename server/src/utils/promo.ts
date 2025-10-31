@@ -2,7 +2,7 @@ export function applyPromo(promoCode: string | undefined, totalCents: number) {
   const promoMap: Record<string, { type: "percent" | "flat"; value: number }> =
     {
       SAVE10: { type: "percent", value: 10 },
-      FLAT100: { type: "flat", value: 10000 },
+      FLAT100: { type: "flat", value: 100 },
     };
 
   if (!promoCode) return totalCents;
