@@ -8,7 +8,7 @@ export const promoSchema = z.object({
 export const bookingSchema = z.object({
   experienceId: z.string().uuid(),
   slotId: z.string().uuid(),
-  date: z.string(),
+  slotTimeId: z.string(),
   userName: z.string().min(2),
   userEmail: z.string().email(),
   seats: z.number().min(1),

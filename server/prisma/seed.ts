@@ -14,7 +14,7 @@ function getNextSixDates() {
 }
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log("Seeding database...");
 
   await prisma.booking.deleteMany();
   await prisma.slotAvailability.deleteMany();
@@ -111,7 +111,6 @@ async function main() {
 
     const dates = getNextSixDates();
 
-    // Insert each date (Slot)
     for (const date of dates) {
       const slotDate = await prisma.slot.create({
         data: {
@@ -120,7 +119,6 @@ async function main() {
         },
       });
 
-      // Insert times inside that date
       for (const time of slotTimes) {
         await prisma.slotAvailability.create({
           data: {
@@ -133,7 +131,7 @@ async function main() {
     }
   }
 
-  console.log("✅ Seeding complete!");
+  console.log("Seeding complete!");
 }
 
 main()

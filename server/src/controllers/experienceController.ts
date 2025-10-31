@@ -37,21 +37,21 @@ export const getExperienceBySlug = async (req: Request, res: Response) => {
         priceCents: true,
         imageUrl: true,
 
-        slots: {
+        dates: {
           select: {
             id: true,
-            time: true,
+            date: true,
 
-            availability: {
+            times: {
               select: {
                 id: true,
-                date: true,
+                time: true,
                 capacity: true,
               },
-              orderBy: { date: "asc" },
+              orderBy: { time: "asc" },
             },
           },
-          orderBy: { time: "asc" },
+          orderBy: { date: "asc" },
         },
       },
     });

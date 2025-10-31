@@ -4,8 +4,6 @@ import { z } from "zod";
 import { applyPromo } from "../utils/promo";
 import { bookingSchema } from "../utils/types";
 
-
-
 export const createBooking = async (req: Request, res: Response) => {
   try {
     const parsed = bookingSchema.safeParse(req.body);
@@ -19,7 +17,7 @@ export const createBooking = async (req: Request, res: Response) => {
     const {
       experienceId,
       slotId,
-      date,
+      slotTimeId,
       userName,
       userEmail,
       seats,
@@ -27,11 +25,14 @@ export const createBooking = async (req: Request, res: Response) => {
     } = parsed.data;
 
     const result = await prisma.$transaction(async (tx) => {
-      const availability = await tx.slotAvailability.findFirst({
-        where: { slotId, date: new Date(date) },
+      const availability = await tx.slotAvailability.findUnique({
+        where: { id: slotTimeId },
       });
 
-      if (!availability) throw new Error("Slot not available for this date");
+      if (!availability) throw new Error("Selected time slot does not exist");
+      if (availability.slotId !== slotId)
+        throw new Error("Selected time slot does not belong to this date");
+
       if (availability.capacity < seats)
         throw new Error("Not enough seats available");
 
@@ -42,7 +43,6 @@ export const createBooking = async (req: Request, res: Response) => {
       if (!experience) throw new Error("Experience not found");
 
       let total = experience.priceCents * seats;
-
       const discounted = applyPromo(promoCode, total);
 
       await tx.slotAvailability.update({
@@ -54,7 +54,8 @@ export const createBooking = async (req: Request, res: Response) => {
         data: {
           experienceId,
           slotId,
-          date: new Date(date),
+          slotTimeId,
+          date: new Date(),
           userName,
           userEmail,
           seats,
