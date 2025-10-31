@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import experienceRoute from "./routes/experienceRoute";
+import bookingRoute from "./routes/bookingRoute";
+import promoRoute from "./routes/promoRoute";
 
 const app = express();
 
@@ -11,8 +14,8 @@ app.get("/health", (req, res) => {
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/experiences", experienceRoutes);
-app.use("/bookings", bookingRoutes);
-app.use("/promo", promoRoutes);
+app.use("/api/experiences", experienceRoute);
+app.use("/api/bookings", bookingRoute);
+app.use("/api/promo", promoRoute);
 
 export default app;
