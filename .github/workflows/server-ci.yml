@@ -1,25 +1,25 @@
-name: Frontend CI - Staging
+name: Backend CI
 
 on:
   push:
-    branches: ["staged"]
+    branches: ["dev", "stage", "main"]
   pull_request:
-    branches: ["staged"]
+    branches: ["dev", "stage", "main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Cache node modules
+      - name: Cache deps
         uses: actions/cache@v3
         with:
           path: ~/.npm
@@ -27,24 +27,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Install dependencies
+      - name: Install deps
         run: npm install --legacy-peer-deps
-        working-directory: ./client
-
-      - name: Build Next.js app
-        run: npm run build
-        working-directory: ./client
+        working-directory: ./server
 
       - name: Run Linter
         run: npm run lint
-        working-directory: ./client
+        working-directory: ./server
 
       - name: Run Tests
         run: npm test -- --watchAll=false
-        working-directory: ./client
+        working-directory: ./server
 
-      - name: Upload build artifact
+      - name: Build
+        run: npm run build
+        working-directory: ./server
+
+      - name: Upload Dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: client-build
-          path: ./client/.next
+          name: server-dist
+          path: ./server/dist

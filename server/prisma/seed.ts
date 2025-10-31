@@ -13,7 +13,7 @@ function getNextSixDates() {
   return dates;
 }
 
-async function main() {``
+async function main() {
   console.log("Seeding database...");
 
   await prisma.booking.deleteMany();
@@ -134,8 +134,9 @@ async function main() {``
 }
 
 main()
-  .catch((e) => {
+  .catch(async (e) => {
     console.error(e);
+    await prisma.$disconnect();
     process.exit(1);
   })
   .finally(async () => {

@@ -45,7 +45,7 @@ export const createBooking = async (req: Request, res: Response) => {
 
       if (!experience) throw new Error("Experience not found");
 
-      let total = experience.priceCents * seats;
+      const total = experience.priceCents * seats;
       const discounted = applyPromo(promoCode, total);
 
       await tx.slotAvailability.update({
@@ -74,11 +74,25 @@ export const createBooking = async (req: Request, res: Response) => {
     console.log(result);
 
     return res.status(200).json({ success: true, booking: result });
-  } catch (err: any) {
-    console.error("Booking Error:", err);
-    return res.status(err.status || 500).json({
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      const status =
+        typeof (err as { status?: number }).status === "number"
+          ? (err as unknown as { status: number }).status
+          : 500;
+
+      console.error("Booking Error:", err);
+
+      return res.status(status).json({
+        success: false,
+        message: err.message || "Something went wrong",
+      });
+    }
+
+    console.error("Unknown booking error:", err);
+    return res.status(500).json({
       success: false,
-      message: err.message || "Something went wrong",
+      message: "Unknown error occurred",
     });
   }
 };
