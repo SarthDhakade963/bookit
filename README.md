@@ -34,7 +34,7 @@ bookit/
 ### **Frontend (`.env.local`)**
 
 ```
-NEXT_PUBLIC_API_BASE_URL=https://your-backend-url.com
+NEXT_PUBLIC_API_BASE_URL=https://your-backend-url.com/api
 ```
 
 ### **Backend (`.env`)**
@@ -42,7 +42,6 @@ NEXT_PUBLIC_API_BASE_URL=https://your-backend-url.com
 ```
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME?schema=public"
 PORT=5000
-JWT_SECRET=yourSecretKey
 ```
 
 ---
